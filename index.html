@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalStore App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .edit-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .save-btn, .delete-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background-color: #218838;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .empty {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>LocalStore App</h1>
+    <div class="container">
+        <h2>Local Storage</h2>
+        <div class="form-group">
+            <label for="keyInput">Key:</label>
+            <input type="text" id="keyInput" placeholder="Enter key">
+        </div>
+        <div class="form-group">
+            <label for="valueInput">Value:</label>
+            <input type="text" id="valueInput" placeholder="Enter value">
+        </div>
+        <div class="form-group">
+            <button id="addLocalButton">Add to Local Storage</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="localStorageTable">
+                <!-- Local Storage data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+        <h2>Session Storage</h2>
+        <div class="form-group">
+            <label for="sessionKeyInput">Key:</label>
+            <input type="text" id="sessionKeyInput" placeholder="Enter key">
+        </div>
+        <div class="form-group">
+            <label for="sessionValueInput">Value:</label>
+            <input type="text" id="sessionValueInput" placeholder="Enter value">
+        </div>
+        <div class="form-group">
+            <button id="addSessionButton">Add to Session Storage</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sessionStorageTable">
+                <!-- Session Storage data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const localKeyInput = document.getElementById('keyInput');
+        const localValueInput = document.getElementById('valueInput');
+        const addLocalButton = document.getElementById('addLocalButton');
+        const localStorageTable = document.getElementById('localStorageTable');
+
+        const sessionKeyInput = document.getElementById('sessionKeyInput');
+        const sessionValueInput = document.getElementById('sessionValueInput');
+        const addSessionButton = document.getElementById('addSessionButton');
+        const sessionStorageTable = document.getElementById('sessionStorageTable');
+
+        // Refresh Local Storage Table
+        function refreshLocalStorageTable() {
+            localStorageTable.innerHTML = '';
+            if (localStorage.length === 0) {
+                localStorageTable.innerHTML = '<tr><td colspan="3" class="empty">No data in Local Storage</td></tr>';
+                return;
+            }
+            Object.keys(localStorage).forEach(key => {
+                const value = localStorage.getItem(key);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${key}</td>
+                    <td>
+                        <input 
+                            type="text" 
+                            class="edit-input" 
+                            value="${value}" 
+                            onchange="updateLocalValue('${key}', this.value)"
+                        />
+                    </td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteLocalKey('${key}')">Delete</button>
+                    </td>
+                `;
+                localStorageTable.appendChild(row);
+            });
+        }
+
+        // Refresh Session Storage Table
+        function refreshSessionStorageTable() {
+            sessionStorageTable.innerHTML = '';
+            if (sessionStorage.length === 0) {
+                sessionStorageTable.innerHTML = '<tr><td colspan="3" class="empty">No data in Session Storage</td></tr>';
+                return;
+            }
+            Object.keys(sessionStorage).forEach(key => {
+                const value = sessionStorage.getItem(key);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${key}</td>
+                    <td>
+                        <input 
+                            type="text" 
+                            class="edit-input" 
+                            value="${value}" 
+                            onchange="updateSessionValue('${key}', this.value)"
+                        />
+                    </td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteSessionKey('${key}')">Delete</button>
+                    </td>
+                `;
+                sessionStorageTable.appendChild(row);
+            });
+        }
+
+        // Add key-value to Local Storage
+        addLocalButton.addEventListener('click', () => {
+            const key = localKeyInput.value.trim();
+            const value = localValueInput.value.trim();
+            if (!key || !value) {
+                alert('Key and Value are required!');
+                return;
+            }
+            localStorage.setItem(key, value);
+            localKeyInput.value = '';
+            localValueInput.value = '';
+            refreshLocalStorageTable();
+        });
+
+        // Add key-value to Session Storage
+        addSessionButton.addEventListener('click', () => {
+            const key = sessionKeyInput.value.trim();
+            const value = sessionValueInput.value.trim();
+            if (!key || !value) {
+                alert('Key and Value are required!');
+                return;
+            }
+            sessionStorage.setItem(key, value);
+            sessionKeyInput.value = '';
+            sessionValueInput.value = '';
+            refreshSessionStorageTable();
+        });
+
+        // Update value in Local Storage
+        function updateLocalValue(key, newValue) {
+            localStorage.setItem(key, newValue);
+            refreshLocalStorageTable();
+        }
+
+        // Update value in Session Storage
+        function updateSessionValue(key, newValue) {
+            sessionStorage.setItem(key, newValue);
+            refreshSessionStorageTable();
+        }
+
+        // Delete key from Local Storage
+        function deleteLocalKey(key) {
+            localStorage.removeItem(key);
+            refreshLocalStorageTable();
+        }
+
+        // Delete key from Session Storage
+        function deleteSessionKey(key) {
+            sessionStorage.removeItem(key);
+            refreshSessionStorageTable();
+        }
+
+        // Initial table load
+        refreshLocalStorageTable();
+        refreshSessionStorageTable();
+    </script>
+</body>
+</html>
